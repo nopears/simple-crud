@@ -1,15 +1,15 @@
 import {IncomingMessage, ServerResponse} from 'http'
-import {getAll, get} from './endpoints/user'
+import {getUser, getAllUsers, addUser, changeUser, deleteUser} from './endpoints/user'
 
 export const requestHandler = (req: IncomingMessage, res: ServerResponse) => {
   switch(req.method) {
     case 'GET': {
       if (req.url === '/api/users') {
-        getAll(res)
+        getAllUsers(res)
       } else if (req.url && /\/api\/users\/[a-zA-Z0-9-]+$/.test(req.url)) {
-        const id = req.url.split('/')[-1]
+        const id = req.url.split('/').slice(-1)[0]
 
-        get(id, res)
+        getUser(id, res)
       } else {
         res.writeHead(404, {'Content-Type': 'text/plain'})
         res.write('Request not found')
@@ -18,15 +18,53 @@ export const requestHandler = (req: IncomingMessage, res: ServerResponse) => {
       break
     }
     case 'POST': {
-      const body = ''
-
       if (req.url === '/api/users') {
-        getAll(res)
+        let body = ''
+
+        req.on('data', (data) => {
+          body += data
+        })
+
+        req.on('end', () => {
+          addUser(body, res)
+        })
       } else {
         res.writeHead(404, {'Content-Type': 'text/plain'})
         res.write('Request not found')
         res.end()
       }
+      break
+    }
+    case 'PUT': {
+      if (req.url && /\/api\/users\/[a-zA-Z0-9-]+$/.test(req.url)) {
+        let body = ''
+        const id = req.url.split('/').slice(-1)[0]
+
+        req.on('data', (data) => {
+          body += data
+        })
+
+        req.on('end', () => {
+          changeUser(id, body, res)
+        })
+      } else {
+        res.writeHead(404, {'Content-Type': 'text/plain'})
+        res.write('Request not found')
+        res.end()
+      }
+      break
+    }
+    case 'DELETE': {
+      if (req.url && /\/api\/users\/[a-zA-Z0-9-]+$/.test(req.url)) {
+        const id = req.url.split('/').slice(-1)[0]
+
+        deleteUser(id, res)
+      } else {
+        res.writeHead(404, {'Content-Type': 'text/plain'})
+        res.write('Request not found')
+        res.end()
+      }
+      break
     }
   }
 }
