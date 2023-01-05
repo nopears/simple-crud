@@ -30,19 +30,21 @@ export const getUser = (id: string, res: ServerResponse) => {
 }
 
 export const addUser = (body: any, res: ServerResponse) => {
-  const user: User = JSON.parse(body) as User
+  try {
+    const user: User = JSON.parse(body) as User
 
-  if (user.username && user.hobbies && user.age) {
     user['id'] = v4()
     users.push(user)
     res.writeHead(201, {'Content-Type': 'application/json'})
     res.write(JSON.stringify(user))
     res.end()
-  } else {
+  }
+  catch {
     res.writeHead(400, {'Content-Type': 'text/plain'})
     res.write('Wrong body')
     res.end()
   }
+
 }
 
 export const changeUser = (id: string, body: any, res: ServerResponse) => {
