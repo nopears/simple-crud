@@ -66,5 +66,9 @@ export const requestHandler = (req: IncomingMessage, res: ServerResponse) => {
       }
       break
     }
+    default:
+      res.writeHead(404, {'Content-Type': 'text/plain'})
+      res.write('Request method not found')
+      res.end()
   }
 }
